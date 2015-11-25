@@ -29,7 +29,7 @@ class TestHelperFunctions(object):
         from ramses import models
         config = Mock()
         models.prepare_relationship(
-            config, 'foobar', 'Story', 'raml_resource')
+            config, 'Story', 'raml_resource')
         mock_get.assert_called_once_with('Story')
         assert not mock_set.called
 
@@ -44,9 +44,8 @@ class TestHelperFunctions(object):
         ]))
         mock_get.return_value = None
         with pytest.raises(ValueError) as ex:
-            models.prepare_relationship(
-                config, 'stories', 'Story', resource)
-        expected = ('Model `Story` used in relationship `stories` '
+            models.prepare_relationship(config, 'Story', resource)
+        expected = ('Model `Story` used in relationship '
                     'is not defined')
         assert str(ex.value) == expected
 
@@ -64,16 +63,30 @@ class TestHelperFunctions(object):
         ]))
         mock_get.return_value = None
         config = config_mock()
-        models.prepare_relationship(config, 'stories', 'Story', resource)
+        models.prepare_relationship(config, 'Story', resource)
         mock_set.assert_called_once_with(config, matching_res, 'Story')
 
+    @patch('ramses.models.resource_schema')
     @patch('ramses.models.get_existing_model')
-    def test_setup_data_model_existing_model(self, mock_get):
+    def test_setup_data_model_existing_model(self, mock_get, mock_schema):
         from ramses import models
         config = Mock()
         mock_get.return_value = 1
+        mock_schema.return_value = {"foo": "bar"}
         model, auth_model = models.setup_data_model(config, 'foo', 'Bar')
         assert not auth_model
+        assert model == 1
+        mock_get.assert_called_once_with('Bar')
+
+    @patch('ramses.models.resource_schema')
+    @patch('ramses.models.get_existing_model')
+    def test_setup_data_model_existing_auth_model(self, mock_get, mock_schema):
+        from ramses import models
+        config = Mock()
+        mock_get.return_value = 1
+        mock_schema.return_value = {"_auth_model": True}
+        model, auth_model = models.setup_data_model(config, 'foo', 'Bar')
+        assert auth_model
         assert model == 1
         mock_get.assert_called_once_with('Bar')
 
@@ -306,7 +319,7 @@ class TestGenerateModelCls(object):
             config, schema=schema, model_name='Story',
             raml_resource=1)
         mock_prep.assert_called_once_with(
-            config, 'progress', 'FooBar', 1)
+            config, 'FooBar', 1)
 
     def test_foreignkey_field(
             self, mock_reg, mock_subscribers, mock_proc):

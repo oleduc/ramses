@@ -1,6 +1,7 @@
 import logging
 
 from nefertari import engine
+from inflection import pluralize
 
 from .utils import (
     resolve_to_callable, is_callable_tag,
@@ -55,7 +56,7 @@ def get_existing_model(model_name):
         log.debug('Model `{}` does not exist'.format(model_name))
 
 
-def prepare_relationship(config, field_name, model_name, raml_resource):
+def prepare_relationship(config, model_name, raml_resource):
     """ Create referenced model if it doesn't exist.
 
     When preparing a relationship, we check to see if the model that will be
@@ -63,20 +64,21 @@ def prepare_relationship(config, field_name, model_name, raml_resource):
     to use it in a relationship. Thus the first usage of this model in RAML file
     must provide its schema in POST method resource body schema.
 
-    :param field_name: Name of the field that should become a `Relationship`.
     :param model_name: Name of model which should be generated.
     :param raml_resource: Instance of ramlfications.raml.ResourceNode for
         which :model_name: will be defined.
     """
     if get_existing_model(model_name) is None:
+        plural_route = '/' + pluralize(model_name.lower())
+        route = '/' + model_name.lower()
         for res in raml_resource.root.resources:
             if res.method.upper() != 'POST':
                 continue
-            if res.path.endswith('/' + field_name):
+            if res.path.endswith(plural_route) or res.path.endswith(route):
                 break
         else:
-            raise ValueError('Model `{}` used in relationship `{}` is not '
-                             'defined'.format(model_name, field_name))
+            raise ValueError('Model `{}` used in relationship is not '
+                             'defined'.format(model_name))
         setup_data_model(config, res, model_name)
 
 
@@ -146,7 +148,7 @@ def generate_model_cls(config, schema, model_name, raml_resource,
 
         if field_cls is engine.Relationship:
             prepare_relationship(
-                config, field_name, field_kwargs['document'],
+                config, field_kwargs['document'],
                 raml_resource)
         if field_cls is engine.ForeignKeyField:
             key = 'ref_column_type'
@@ -179,12 +181,13 @@ def setup_data_model(config, raml_resource, model_name):
     :param model_name: String representing model name.
     """
     model_cls = get_existing_model(model_name)
-    if model_cls is not None:
-        return model_cls, False
-
     schema = resource_schema(raml_resource)
+
     if not schema:
         raise Exception('Missing schema for model `{}`'.format(model_name))
+
+    if model_cls is not None:
+        return model_cls, schema.get('_auth_model', False)
 
     log.info('Generating model class `{}`'.format(model_name))
     return generate_model_cls(

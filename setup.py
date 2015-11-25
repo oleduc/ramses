@@ -8,9 +8,9 @@ VERSION = open(os.path.join(here, 'VERSION')).read()
 requires = [
     'cryptacular',
     'inflection',
-    'nefertari>=0.6.0',
+    'nefertari>=0.6.1',
     'pyramid',
-    'ramlfications==0.1.5',
+    'ramlfications==0.1.8',
     'six',
     'transaction',
 ]
