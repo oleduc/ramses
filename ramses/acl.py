@@ -148,8 +148,8 @@ class BaseACL(CollectionACL):
         """ Apply callables to `self._item_acl` if request is on a specific item or `self._collection_acl` for everything
             else and return result.
         """
-        if isinstance(self.request.context, DataProxy):
-            return self._apply_callables(acl=self._item_acl)
+        if hasattr(self.request, 'context') and isinstance(self.request.context, DataProxy):
+            return self.item_acl(self.request.context)
         else:
             return self._apply_callables(acl=self._collection_acl)
 
