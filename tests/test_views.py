@@ -479,7 +479,7 @@ class TestESCollectionView(ViewTestBase):
         result = view.update_many(foo=1)
         view.get_dbcollection_with_es.assert_called_once_with(foo=1)
         view.Model._update_many.assert_called_once_with(
-            view.get_dbcollection_with_es(), {'foo2': 'bar2'},
+            view.get_dbcollection_with_es().all(), {'foo2': 'bar2'},
             view.request)
         assert result == 123
 
