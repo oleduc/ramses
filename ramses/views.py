@@ -299,14 +299,12 @@ class ESCollectionView(ESBaseView, CollectionView):
         """ Explicitly reload context with DB usage to get access
         to complete DB object.
         """
-        #self.reload_context(es_based=False, **kwargs)
         return super(ESCollectionView, self).update(**kwargs)
 
     def delete(self, **kwargs):
         """ Explicitly reload context with DB usage to get access
         to complete DB object.
         """
-        #self.reload_context(es_based=False, **kwargs)
         return super(ESCollectionView, self).delete(**kwargs)
 
     def get_dbcollection_with_es(self, **kwargs):
