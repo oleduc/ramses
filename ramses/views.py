@@ -388,8 +388,6 @@ class ItemAttributeView(ItemSubresourceBaseView):
         obj = self.get_item(**kwargs)
         obj.update_iterables(
             self._json_params, self.attr,
-            unique=self.unique,
-            value_type=self.value_type,
             request=self.request)
         return getattr(obj, self.attr, None)
 
