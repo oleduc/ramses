@@ -146,7 +146,7 @@ def generate_model_cls(config, schema, model_name, raml_resource,
 
         field_cls = type_fields[type_name]
 
-        if field_cls is engine.Relationship:
+        if field_cls is engine.Relationship and field_kwargs['document'] != model_name:
             prepare_relationship(
                 config, field_kwargs['document'],
                 raml_resource)

@@ -299,14 +299,12 @@ class ESCollectionView(ESBaseView, CollectionView):
         """ Explicitly reload context with DB usage to get access
         to complete DB object.
         """
-        self.reload_context(es_based=False, **kwargs)
         return super(ESCollectionView, self).update(**kwargs)
 
     def delete(self, **kwargs):
         """ Explicitly reload context with DB usage to get access
         to complete DB object.
         """
-        self.reload_context(es_based=False, **kwargs)
         return super(ESCollectionView, self).delete(**kwargs)
 
     def get_dbcollection_with_es(self, **kwargs):
@@ -390,8 +388,6 @@ class ItemAttributeView(ItemSubresourceBaseView):
         obj = self.get_item(**kwargs)
         obj.update_iterables(
             self._json_params, self.attr,
-            unique=self.unique,
-            value_type=self.value_type,
             request=self.request)
         return getattr(obj, self.attr, None)
 
