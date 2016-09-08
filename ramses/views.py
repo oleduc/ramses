@@ -331,9 +331,12 @@ class ESCollectionView(ESBaseView, CollectionView):
         by ES in the 'index' method (so user updates what he saw).
         """
         db_objects = self.get_dbcollection_with_es(**kwargs)
-        items = db_objects.all()
+
+        if not isinstance(db_objects, list):
+            db_objects = db_objects.all()
+
         return self.Model._update_many(
-            items, self._json_params, self.request)
+            db_objects, self._json_params, self.request)
 
 
 class ItemSubresourceBaseView(BaseView):
