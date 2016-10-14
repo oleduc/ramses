@@ -67,7 +67,14 @@ def _setup_ticket_policy(config, params):
     params['secret'] = config.registry.settings[params['secret']]
 
     auth_model = config.registry.auth_model
-    params['callback'] = auth_model.get_groups_by_userid
+    auth_user_validate = getattr(config.registry, 'auth_user_validate', None)
+
+    def auth_callback(userid, request):
+        groups = auth_model.get_groups_by_userid(userid, request)
+        if groups is None or not auth_user_validate or auth_user_validate and auth_user_validate(request._user):
+            return groups
+        return None
+    params['callback'] = auth_callback
 
     config.add_request_method(
         auth_model.get_authuser_by_userid, 'user', reify=True)
