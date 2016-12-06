@@ -16,7 +16,9 @@ build:
       - if [ "$BRANCH" == "develop" ]; then pip install -r requirements.dev; fi
       - if [ "$BRANCH" != "develop" ]; then pip install -r requirements.txt; fi
       - pip install -U pytest
-      - pytest --cov ramses tests
+      - mkdir -p shippable/testresults
+      - mkdir -p shippable/codecoverage
+      - pytest --cov-report xml:shippable/codecoverage/cov.xml --cov-report term --cov ramses tests --junit-xml=shippable/testresults/results.xml
 
 integrations:
     notifications:
