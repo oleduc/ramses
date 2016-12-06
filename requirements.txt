@@ -1,0 +1,10 @@
+mock
+pytest
+pytest-cov
+releases
+sphinx
+
+git+https://github.com/geniusproject/nefertari.git@master#egg=nefertari
+git+https://github.com/geniusproject/nefertari-guards.git@master#egg=nefertari-guards
+
+-e .
