@@ -15,6 +15,7 @@ build:
     ci:
       - if [ "$BRANCH" == "develop" ]; then pip install -r requirements.dev; fi
       - if [ "$BRANCH" != "develop" ]; then pip install -r requirements.txt; fi
+      - pip install -U pytest
       - pytest --cov ramses tests
 
 integrations:
