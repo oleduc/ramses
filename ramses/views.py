@@ -197,7 +197,7 @@ class CollectionView(BaseView):
 
     def delete_many(self, **kwargs):
         objects = self.get_collection()
-        self.deleted = [i.get_view() for i in objects]
+        self._deleted = [i.get_view() for i in objects]
         return self.Model._delete_many(objects, self.request)
 
     def update_many(self, **kwargs):
@@ -322,7 +322,7 @@ class ESCollectionView(ESBaseView, CollectionView):
         by ES in the 'index' method (so user deletes what he saw).
         """
         db_objects = self.get_dbcollection_with_es(**kwargs)
-        self.deleted = [i.get_view() for i in db_objects]
+        self._deleted = [i.get_view() for i in db_objects]
         return self.Model._delete_many(db_objects, self.request)
 
     def update_many(self, **kwargs):
