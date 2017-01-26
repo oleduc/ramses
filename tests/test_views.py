@@ -260,7 +260,7 @@ class TestCollectionView(ViewTestBase):
         view = self._test_view()
         view.Model = Mock(__name__='Mock')
         view.Model._delete_many.return_value = 123
-        view.get_collection = Mock()
+        view.get_collection = Mock(return_value=[Mock()])
         resp = view.delete_many(foo=1)
         view.get_collection.assert_called_once_with()
         view.Model._delete_many.assert_called_once_with(
@@ -462,7 +462,7 @@ class TestESCollectionView(ViewTestBase):
         view = self._test_view()
         view.Model = Mock(__name__='Foo')
         view.Model._delete_many.return_value = 123
-        view.get_dbcollection_with_es = Mock()
+        view.get_dbcollection_with_es = Mock(return_value=[Mock()])
         result = view.delete_many(foo=1)
         view.get_dbcollection_with_es.assert_called_once_with(foo=1)
         view.Model._delete_many.assert_called_once_with(

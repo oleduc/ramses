@@ -206,10 +206,7 @@ def handle_model_generation(config, raml_resource, route_name):
     :param route_name: String name of the resource.
     """
     model_name = generate_model_name(route_name)
-    try:
-        return setup_data_model(config, raml_resource, model_name)
-    except ValueError as ex:
-        raise ValueError('{}: {}'.format(model_name, str(ex)))
+    return setup_data_model(config, raml_resource, model_name)
 
 
 def setup_model_event_subscribers(config, model_cls, schema):
@@ -224,7 +221,7 @@ def setup_model_event_subscribers(config, model_cls, schema):
     event_kwargs = {'model': model_cls}
 
     for event_tag, subscribers in model_events.items():
-        type_, action = event_tag.split('_')
+        type_, action = event_tag.split('_', 1)
         event_objects = events_map[type_][action]
 
         if not isinstance(event_objects, list):
