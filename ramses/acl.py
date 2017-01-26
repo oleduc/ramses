@@ -257,7 +257,7 @@ def generate_acl(config, model_cls, raml_resource, es_based=True):
 
         def __init__(self, request, es_based=es_based):
             super(GeneratedACLBase, self).__init__(request=request)
-            self.es_based = False if request.method in ["POST", "PATCH", "DELETE"] else es_based
+            self.es_based = False if request and request.method in ["POST", "PATCH", "DELETE"] else es_based
             self._collection_acl = collection_acl
             self._item_acl = item_acl
 

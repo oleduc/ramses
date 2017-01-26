@@ -1,3 +1,4 @@
+from mock import Mock
 import pytest
 
 
@@ -10,7 +11,6 @@ def clear_registry(request):
 @pytest.fixture
 def engine_mock(request):
     import nefertari
-    from mock import Mock
 
     class BaseDocument(object):
         pass
@@ -34,7 +34,6 @@ def engine_mock(request):
 def guards_engine_mock(request):
     import nefertari_guards
     from nefertari_guards import engine
-    from mock import Mock
 
     class DocumentACLMixin(object):
         pass
@@ -51,7 +50,15 @@ def guards_engine_mock(request):
 
 
 def config_mock():
-    from mock import Mock
     config = Mock()
     config.registry.database_acls = False
     return config
+
+
+def assert_called_with_at_least(mock, *args, **kwargs):
+    assert mock.call_args is not None
+    call_args, call_kwargs = mock.call_args
+    assert set(args).issubset(call_args)
+    for key in kwargs:
+        assert key in call_kwargs
+        assert call_kwargs[key] == kwargs[key]

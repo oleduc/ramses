@@ -4,7 +4,7 @@ from mock import Mock, patch
 from nefertari.utils import dictset
 from pyramid.security import Allow, ALL_PERMISSIONS
 
-from .fixtures import engine_mock, guards_engine_mock
+from .fixtures import engine_mock, guards_engine_mock, assert_called_with_at_least
 
 
 @pytest.mark.usefixtures('engine_mock')
@@ -84,11 +84,10 @@ class TestSetupTicketPolicy(object):
         config.registry.settings = {'my_secret_setting': 12345}
         config.registry.auth_model = auth_model
         auth._setup_ticket_policy(config=config, params=params)
-        mock_policy.assert_called_once_with(
-            include_ip=True, secure=True, parent_domain=True,
-            callback=auth_model.get_groups_by_userid, secret=12345,
-            wild_domain=True, debug=True, http_only=False
-        )
+        assert_called_with_at_least(mock_policy,
+                                    include_ip=True, secure=True, parent_domain=True, secret=12345,
+                                    wild_domain=True, debug=True, http_only=False
+                                    )
 
     @patch('ramses.auth.AuthTktAuthenticationPolicy')
     def test_request_method_added(self, mock_policy):
