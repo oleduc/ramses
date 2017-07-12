@@ -226,7 +226,7 @@ class TestCollectionView(ViewTestBase):
         view._location = Mock(return_value='/sadasd')
         resp = view.create(foo='bar')
         view.Model.assert_called_with(foo2='bar2')
-        view.Model().save.assert_called_with(view.request)
+        view.Model().save.assert_called_with()
         assert view.set_object_acl.call_count == 1
         assert resp == view.Model().save()
 
@@ -237,7 +237,7 @@ class TestCollectionView(ViewTestBase):
         resp = view.update(foo=1)
         view.get_item.assert_called_once_with(foo=1)
         view.get_item().update.assert_called_once_with(
-            {'foo2': 'bar2'}, view.request)
+            {'foo2': 'bar2'})
         assert resp == view.get_item().update()
 
     def test_replace(self):
@@ -252,19 +252,18 @@ class TestCollectionView(ViewTestBase):
         view.get_item = Mock()
         resp = view.delete(foo=1)
         view.get_item.assert_called_once_with(foo=1)
-        view.get_item().delete.assert_called_once_with(
-            view.request)
+        view.get_item().delete.assert_called_once_with()
         assert resp is None
 
     def test_delete_many(self):
         view = self._test_view()
         view.Model = Mock(__name__='Mock')
         view.Model._delete_many.return_value = 123
-        view.get_collection = Mock()
+        view.get_collection = Mock(return_value=[Mock()])
         resp = view.delete_many(foo=1)
         view.get_collection.assert_called_once_with()
         view.Model._delete_many.assert_called_once_with(
-            view.get_collection(), view.request)
+            view.get_collection())
         assert resp == 123
 
     def test_update_many(self):
@@ -275,8 +274,7 @@ class TestCollectionView(ViewTestBase):
         resp = view.update_many(qoo=1)
         view.get_collection.assert_called_once_with(_limit=20, foo='bar')
         view.Model._update_many.assert_called_once_with(
-            view.get_collection(), {'foo2': 'bar2'},
-            view.request)
+            view.get_collection(), {'foo2': 'bar2'})
         assert resp == 123
 
 
@@ -434,13 +432,11 @@ class TestESCollectionView(ViewTestBase):
     def test_update(self):
         view = self._test_view()
         view.get_item = Mock()
-        view.reload_context = Mock()
         view._location = Mock(return_value='/sadasd')
         resp = view.update(foo=1)
-        view.reload_context.assert_called_once_with(es_based=False, foo=1)
         view.get_item.assert_called_once_with(foo=1)
         view.get_item().update.assert_called_once_with(
-            {'foo2': 'bar2'}, view.request)
+            {'foo2': 'bar2'})
         assert resp == view.get_item().update()
 
     def test_replace(self):
@@ -464,11 +460,11 @@ class TestESCollectionView(ViewTestBase):
         view = self._test_view()
         view.Model = Mock(__name__='Foo')
         view.Model._delete_many.return_value = 123
-        view.get_dbcollection_with_es = Mock()
+        view.get_dbcollection_with_es = Mock(return_value=[Mock()])
         result = view.delete_many(foo=1)
         view.get_dbcollection_with_es.assert_called_once_with(foo=1)
         view.Model._delete_many.assert_called_once_with(
-            view.get_dbcollection_with_es(), view.request)
+            view.get_dbcollection_with_es())
         assert result == 123
 
     def test_update_many(self):
@@ -479,8 +475,7 @@ class TestESCollectionView(ViewTestBase):
         result = view.update_many(foo=1)
         view.get_dbcollection_with_es.assert_called_once_with(foo=1)
         view.Model._update_many.assert_called_once_with(
-            view.get_dbcollection_with_es().all(), {'foo2': 'bar2'},
-            view.request)
+            view.get_dbcollection_with_es().all(), {'foo2': 'bar2'})
         assert result == 123
 
 
@@ -533,9 +528,7 @@ class TestItemAttributeView(ViewTestBase):
         view.get_item.assert_called_once_with(foo=1)
         obj = view.get_item()
         obj.update_iterables.assert_called_once_with(
-            {'foo2': 'bar2'}, 'settings',
-            unique=True, value_type=None,
-            request=view.request)
+            {'foo2': 'bar2'}, 'settings')
         assert resp == obj.settings
 
 
@@ -571,10 +564,10 @@ class TestItemSingularView(ViewTestBase):
         view.get_item.assert_called_once_with(foo=1)
         view.Model.assert_called_once_with(foo2='bar2')
         child = view.Model()
-        child.save.assert_called_once_with(view.request)
+        child.save.assert_called_once_with()
         parent = view.get_item()
         parent.update.assert_called_once_with(
-            {'profile': child.save()}, view.request)
+            {'profile': child.save()})
         assert view.set_object_acl.call_count == 1
         assert resp == child.save()
 
@@ -585,7 +578,7 @@ class TestItemSingularView(ViewTestBase):
         view.get_item.assert_called_once_with(foo=1)
         child = view.get_item().profile
         child.update.assert_called_once_with(
-            {'foo2': 'bar2'}, view.request)
+            {'foo2': 'bar2'})
         assert resp == child
 
     def test_replace(self):
@@ -603,8 +596,7 @@ class TestItemSingularView(ViewTestBase):
         assert resp is None
         view.get_item.assert_called_once_with(foo=1)
         parent = view.get_item()
-        parent.profile.delete.assert_called_once_with(
-            view.request)
+        parent.profile.delete.assert_called_once_with()
 
 
 class TestRestViewGeneration(object):

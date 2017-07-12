@@ -182,27 +182,28 @@ class CollectionView(BaseView):
     def create(self, **kwargs):
         obj = self.Model(**self._json_params)
         self.set_object_acl(obj)
-        return obj.save(self.request)
+        return obj.save()
 
     def update(self, **kwargs):
         obj = self.get_item(**kwargs)
-        return obj.update(self._json_params, self.request)
+        return obj.update(self._json_params)
 
     def replace(self, **kwargs):
         return self.update(**kwargs)
 
     def delete(self, **kwargs):
         obj = self.get_item(**kwargs)
-        obj.delete(self.request)
+        obj.delete()
 
     def delete_many(self, **kwargs):
         objects = self.get_collection()
-        return self.Model._delete_many(objects, self.request)
+        self._deleted = [i.get_view() for i in objects]
+        return self.Model._delete_many(objects)
 
     def update_many(self, **kwargs):
         objects = self.get_collection(**self._query_params)
         return self.Model._update_many(
-            objects, self._json_params, self.request)
+            objects, self._json_params)
 
 
 class ESBaseView(BaseView):
@@ -321,7 +322,8 @@ class ESCollectionView(ESBaseView, CollectionView):
         by ES in the 'index' method (so user deletes what he saw).
         """
         db_objects = self.get_dbcollection_with_es(**kwargs)
-        return self.Model._delete_many(db_objects, self.request)
+        self._deleted = [i.get_view() for i in db_objects]
+        return self.Model._delete_many(db_objects)
 
     def update_many(self, **kwargs):
         """ Update multiple objects from collection.
@@ -336,7 +338,7 @@ class ESCollectionView(ESBaseView, CollectionView):
             db_objects = db_objects.all()
 
         return self.Model._update_many(
-            db_objects, self._json_params, self.request)
+            db_objects, self._json_params)
 
 
 class ItemSubresourceBaseView(BaseView):
@@ -390,8 +392,7 @@ class ItemAttributeView(ItemSubresourceBaseView):
     def create(self, **kwargs):
         obj = self.get_item(**kwargs)
         obj.update_iterables(
-            self._json_params, self.attr,
-            request=self.request)
+            self._json_params, self.attr)
         return getattr(obj, self.attr, None)
 
 
@@ -425,14 +426,14 @@ class ItemSingularView(ItemSubresourceBaseView):
         parent_obj = self.get_item(**kwargs)
         obj = self.Model(**self._json_params)
         self.set_object_acl(obj)
-        obj = obj.save(self.request)
-        parent_obj.update({self.attr: obj}, self.request)
+        obj = obj.save()
+        parent_obj.update({self.attr: obj})
         return obj
 
     def update(self, **kwargs):
         parent_obj = self.get_item(**kwargs)
         obj = getattr(parent_obj, self.attr)
-        obj.update(self._json_params, self.request)
+        obj.update(self._json_params)
         return obj
 
     def replace(self, **kwargs):
@@ -441,7 +442,7 @@ class ItemSingularView(ItemSubresourceBaseView):
     def delete(self, **kwargs):
         parent_obj = self.get_item(**kwargs)
         obj = getattr(parent_obj, self.attr)
-        obj.delete(self.request)
+        obj.delete()
 
 
 def generate_rest_view(config, model_cls, attrs=None, es_based=True,
